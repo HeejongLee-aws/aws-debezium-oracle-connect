@@ -1,4 +1,4 @@
-# Oracle 19c Database Debezium 이용한 데이터 마이그래이션(CDC)
+# Oracle 19c Database Debezium Change Data Capture
 
 
 ## Oracle 19c install
@@ -6,6 +6,7 @@
 - https://www.youtube.com/watch?v=GENWOMuQAis
 
 ### Create Logminer User
+- 테스트 환경에서 PDB, CDB 를 사용않았습니다.
 ```
 sqlplus sys/<password>@//localhost:1521/<SID> as sysdba
   CREATE TABLESPACE logminer_tbs DATAFILE '/opt/oracle/oradata/ORCLCDB/logminer_tbs.dbf'
@@ -63,26 +64,41 @@ RUN yum -y install libaio && yum clean all
 USER kafka
 # Deploy Oracle client and drivers
 
-#COPY C:\instantclient_19_12\* $INSTANT_CLIENT_DIR
 COPY C:\instantclient_19_12\xstreams.jar /kafka/libs
 COPY C:\instantclient_19_12\ojdbc8.jar /kafka/libs
 ```
 
 
 ## Docker build
-```docker build --tag debezium/oracle19c-connect:1.6 . --build-arg DEBEZIUM_VERSION=1.6```
-- Debezium 버전을 파라매터로 넘겨준다.
+```
+docker build --tag debezium/oracle19c-connect:1.6 . --build-arg DEBEZIUM_VERSION=1.6
+```
+- Debezium 버전을 파라매터로 넘겨준다. (1.6 버전을 사용함)
 
-## Test
+## 테스트
 
 ### String Zookeeper
-```docker run -it --rm --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 debezium/zookeeper:1.6```
+```
+docker run -it --rm --name zookeeper -p 2181:2181 -p 2888:2888 -p 3888:3888 debezium/zookeeper:1.6
+```
 
 ### Starting Kafka
-```docker run -it --rm --name kafka -p 9092:9092 --link zookeeper:zookeeper debezium/kafka:1.6```
+```
+docker run -it --rm --name kafka -p 9092:9092 --link zookeeper:zookeeper debezium/kafka:1.6
+```
 
 ### Starting Debezium Connector for Oracle
-```docker run -it --rm --name connect -p 8083:8083 -e GROUP_ID=1 -e CONFIG_STORAGE_TOPIC=my_connect_configs -e OFFSET_STORAGE_TOPIC=my_connect_offsets -e STATUS_STORAGE_TOPIC=my_connect_statuses --link zookeeper:zookeeper --link kafka:kafka debezium/oracle19c-connect:1.6```
+```
+docker run -it --rm --name connect -p 8083:8083 -e GROUP_ID=1 -e CONFIG_STORAGE_TOPIC=my_connect_configs -e OFFSET_STORAGE_TOPIC=my_connect_offsets -e STATUS_STORAGE_TOPIC=my_connect_statuses --link zookeeper:zookeeper --link kafka:kafka debezium/oracle19c-connect:1.6
+```
 
 ### view change events
-```docker run -it --rm --name watcher --link zookeeper:zookeeper --link kafka:kafka debezium/kafka:1.6 watch-topic -a -k server1.AWSUSER.EMPLOYEE```
+```
+docker run -it --rm --name watcher --link zookeeper:zookeeper --link kafka:kafka debezium/kafka:1.6 watch-topic -a -k server1.AWSUSER.EMPLOYEE
+```
+
+## Reference
+* Debezium Oracle Connector : https://debezium.io/documentation/reference/1.6/connectors/oracle.html#_preparing_the_database
+* Debezium Oracle Jdbc Example: https://github.com/debezium/debezium-examples/blob/master/tutorial/debezium-with-oracle-jdbc/Dockerfile
+* Introducing MSK Connect : https://aws.amazon.com/ko/blogs/aws/introducing-amazon-msk-connect-stream-data-to-and-from-your-apache-kafka-clusters-using-managed-connectors/
+
