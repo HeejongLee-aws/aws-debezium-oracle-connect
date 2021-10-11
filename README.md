@@ -1,7 +1,8 @@
-# Oracle 19c 를 Debezium 을 이용하여 데이터를 Migration 하기 위한 환경 구성
+# Oracle 19c Database Debezium 이용한 데이터 마이그래이션(CDC)
+
 
 ## Oracle 19c install
-- following instructions in this video, you can install the Oracle 19c successfully.
+- 아래 비디오를 참고하시면 AWS EC2 환경에서 Oracld 19c 를 설치 할 수 있습니다.
 - https://www.youtube.com/watch?v=GENWOMuQAis
 
 ### Create Logminer User
