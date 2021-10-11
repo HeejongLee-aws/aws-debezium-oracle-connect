@@ -1,3 +1,5 @@
+# Oracle 19c 를 Debezium 을 이용하여 데이터를 Migration 하기 위한 환경 구성
+
 ## Oracle 19c install
 - following instructions in this video, you can install the Oracle 19c successfully.
 - https://www.youtube.com/watch?v=GENWOMuQAis
@@ -46,6 +48,8 @@ ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;
 
 
 ## Dockefile 작성
+- Debezium 의 Connector Docker 이미지의 경우, Oracle 19의 ojdbc8.jar 와 xstream.jar 를 포함하고 있지 않습니다.
+- Oracle Connector 로 사용하기 위해서는 아래와 같이 Dockerfile 을 작성하고, Docker Image 를 Build 해야합니다.
 ```
 ARG DEBEZIUM_VERSION
 FROM debezium/connect:$DEBEZIUM_VERSION
